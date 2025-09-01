@@ -1,0 +1,26 @@
+name: portfolio
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11.11
+  - pip
+  - python-dotenv
+  - requests
+  - numpy
+  - pandas
+  - scipy
+  - jupyterlab
+  - ipywidgets
+  - matplotlib
+  - scikit-learn
+  - pip:
+    - beautifulsoup4
+    - plotly
+    - seaborn
+    - streamlit
+    - pillow
+    - opencv-python
+    - pyairtable
+    - rembg
+    - onnxruntime
