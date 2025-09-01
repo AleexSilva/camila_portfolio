@@ -79,7 +79,7 @@ profileDescription=profile['Description']
 profileTagline=profile['tagline']
 linkedInLink=profile['linkedin']
 # xLink=profile['x']
-githubLink=profile['github']
+#githubLink=profile['github']
 picture=profile['picture'][0]['url']
 
 def is_valid_email(email):
@@ -111,7 +111,6 @@ profileHTML=f"""
                             <p>{profileDescription}</p>
                             <div class="card-action">
                             <a href="{linkedInLink}" target="_blank" class="blue-text text-darken-3"><i class="fa-brands fa-linkedin fa-2xl"></i></i></a>
-                            <a href="{githubLink}" target="_blank" class="blue-text text-darken-3"><i class="fa-brands fa-github fa-2xl"></i></a>
                             </div>
                         </div>
                     </div>
