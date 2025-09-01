@@ -1,21 +1,12 @@
 import re
 import streamlit as st
-import pandas as pd
 from pyairtable import Api # https://pyairtable.readthedocs.io/en/stable/getting-started.html
 from datetime import datetime
-import streamlit as st
-import requests
-from io import BytesIO
-from PIL import Image
-import cv2
-import numpy as np
-from rembg import remove
-import onnxruntime
 import time
 
 
 st.set_page_config(
-    page_title="Alex Silva - Portfolio",
+    page_title="Camila Eva Mosteiro - Portfolio",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -72,7 +63,7 @@ AIRTABLE_API_KEY = st.secrets.AIRTABLE_API_KEY # Crea el token en este enlace ht
 # Seleccionamos el base id de Airtable
 AIRTABLE_BASE_ID=st.secrets.AIRTABLE_BASE_ID #Copia la plantilla de este enlace https://airtable.com/appv1dCIP9oXJOXFE/shruOGxFeklRDFp0i/tblIBw5i2w5geQhQc/viwOxM9R5nUpGo3ZO?blocks=hide
 
-# Creamos el objeto de Airtable
+# Airtable API key
 api = Api(AIRTABLE_API_KEY)
 # Cargamos las tablas
 tblprofile = api.table(AIRTABLE_BASE_ID, 'profile')
@@ -100,8 +91,7 @@ def is_valid_email(email):
 #     return re.match(pattern, phone)
 
 
-
-# Creamos la plantilla de perfil con las clases CSS de MaterializeCSS 
+# Creating the profile page with MaterializeCSS
 # https://materializecss.com/
 profileHTML=f"""
 <div class="row">
@@ -130,64 +120,27 @@ profileHTML=f"""
         </div>
     </div>
             """
-# Mostramos el HTML generado
+# we show the generated HTML
+
 st.html(profileHTML)
 
-# Creamos los tabs de Streamlit
+
+#Streamlit Tabs
 tabSkils,tabPortfolio,tabContact =st.tabs(['My skills','My projects','Contact'])
 
-def remove_background(image_url):
-    try:
-        # Download image from URL
-        response = requests.get(image_url)
-        response.raise_for_status()  # Ensure the request was successful
-
-        # Convert image to numpy array
-        image_array = np.asarray(bytearray(response.content), dtype=np.uint8)
-        
-        # Decode image (force it to load as RGB)
-        image = cv2.imdecode(image_array, cv2.IMREAD_UNCHANGED)
-
-        # Ensure image has the correct number of channels (convert grayscale to RGB)
-        if image is None:
-            raise ValueError("Image could not be loaded.")
-
-        if len(image.shape) == 2:  # Grayscale image
-            image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
-        elif image.shape[2] == 4:  # Convert from RGBA to RGB
-            image = cv2.cvtColor(image, cv2.COLOR_BGRA2BGR)
-
-        # Remove background
-        image_no_bg = remove(image)
-
-        return image_no_bg
-
-    except Exception as e:
-        print(f"Error processing image: {e}")
-        return None
     
-# Mostramos el tab de Skills
+# Skills tabs
 with tabSkils:
     skills=""
-    # Hacemos el ciclo creando las plantillas de Skills
+    # for loop to create the skill templates
     for skill in tblskills.all(sort=['-Level']):
         # st.write(skill['fields'])
         skill=skill['fields']
         skillName = skill['Name']
         skillDescription = skill['Notes']    
         skillLevel = skill['Level']
-        #skillImageList = skill.get('picture', [])
-        #skillImage = skillImageList[0]['url'] if skillImageList else None
-        #skillImage = skill['picture'][0]['url']
-        # Add image if available
-        # if skillImage:
-        #     cleaned_img = remove_background(skillImage) # Clean background if needed
-        #     #cleaned_img = skillImage
-        #     skillImageHTML = f'<div style="text-align:center;"><img src="{cleaned_img}" width="80" height="80" style="border-radius:50%;"></div>'
-        # else:
-        #     skillImageHTML = ""
         skillStars=""
-        # Creación de rating con estrellas
+        # Creating rating with stars
         for i in range(1,6):
             if i<=skillLevel:
                 # Estrella completa
@@ -197,9 +150,9 @@ with tabSkils:
                 skillStars=skillStars+'<i class="material-icons">star_border</i>'
                 
         skillYears = skill['startYear']   
-        # Cálculo de años de experiencia
+        # years experiences calculation
         skillExperience = int(today) -int(skillYears)
-        # Plantilla del card de skill
+        # Card skill template
         skillHTML = f"""                    
                 <div class="col s12 m4">
                     <div class="card small">
@@ -224,20 +177,21 @@ with tabSkils:
                 {skills}       
             </div>       
         """     
-    # Mostramos los skills
+    # Skills section
     st.html(skillsHTML) 
 with tabPortfolio:       
     projects=""
     skillsHTML=""
     knowledgeHTML=""
-    # Hacemos el ciclo creando las plantillas de proyectos
+    # for loop to create the project templates
     for project in tblprojects.all():
         # st.write(skill['fields'])
         projectid= project['id']
         project=project["fields"]
-        projectName = project['Name']        
+        projectName = project['Name']       
         projectDescription = project['Description']    
-        # Creamos la lista de Skills y Knowledge
+        
+        # We create the list of Skills and Knowledge
         projectSkils = project['skills']
         skillsHTML=[f'<div class="chip green lighten-4">{p}</div>' for p in projectSkils]
         skillsHTML="".join(skillsHTML)
@@ -247,7 +201,8 @@ with tabPortfolio:
         
         projectLink = project['link'] 
         projectImageUrl = project['image'][0]['url']        
-        # Plantilla de proyectos
+        
+        # Project templates
         projectHTML = f"""                    
                 <div class="col s12 m6">
                     <div class="card large">                    
@@ -280,7 +235,7 @@ with tabPortfolio:
                 {projects}       
             </div>       
         """     
-    # Mostramos los proyectos
+    # Projects section
     st.html(projectsHTML)        
 with tabContact:
     st.info("If you think I can help you with some of your projects or entrepreneurships, send me a message I'll contact you as soon as I can. I'm always glad to help")
@@ -302,16 +257,10 @@ with tabContact:
             if parEmail and not email_valid:
                 st.warning("⚠️ Please enter a valid email address (e.g., example@email.com).")
 
-            # if parPhoneNumber and not phone_valid:
-            #     st.warning("⚠️ Please enter a valid phone number (e.g., +1234567890).")
-
             #btnEnviar = st.button("Send", type="primary", disabled=not (email_valid and phone_valid))
             btnEnviar = st.button("Send", type="primary", disabled=not (email_valid ))
             
-    # if btnEnviar:
-    #     # Creamos el registro de contactos
-    #     tblContacts.create({"Name":parName,"email":parEmail,"phoneNumber":parPhoneNumber,"Notes":parNotes})
-    #     st.toast("Message sent")
+
     
     if btnEnviar:
         with st.spinner("Sending message..."):
